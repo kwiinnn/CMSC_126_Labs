@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
-    /* Apple Minimalist Dark Theme */
     body {
       margin: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -18,7 +17,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Frosted Glass Topbar */
     .topbar {
       background-color: rgba(28, 28, 30, 0.8);
       backdrop-filter: blur(20px);
@@ -44,10 +42,9 @@
       font-size: 24px;
       cursor: pointer;
       margin-right: 15px;
-      color: #0a84ff; /* Apple Blue */
+      color: #0a84ff;
     }
 
-    /* Sleek Sidebar */
     .sidebar {
       position: fixed;
       left: -220px;
@@ -86,7 +83,6 @@
       margin: 0 auto;
     }
 
-    /* Card-like Section */
     .section {
       background-color: #1c1c1e;
       padding: 30px;
@@ -219,11 +215,17 @@
 
       <?php
 
-      require_once 'db.php';
-      $conn = connectDB();
       $action = $_GET['action'] ?? '';
 
-      /* ================= FUNCTIONS ================= */
+
+      function connectDB()
+      {
+        $conn = mysqli_connect("localhost", "root", "", "smartphones_db");
+        if (!$conn) {
+          die("Database connection failed: " . mysqli_connect_error());
+        }
+        return $conn;
+      }
 
       function showTable($conn)
       {
@@ -279,17 +281,14 @@
         if (isset($_GET['submit_update'])) {
           $phone_id = $_GET['phone_id'];
 
-          // 1. Check if the ID actually exists in the database
           $check_query = mysqli_query($conn, "SELECT phone_id FROM smartphones WHERE phone_id = '$phone_id'");
 
           if (mysqli_num_rows($check_query) > 0) {
             
-            // 2. Secondary check to ensure no fields are completely empty
             if (!empty($_GET['brand']) && !empty($_GET['model_name']) && !empty($_GET['color']) && 
                 $_GET['ram_gb'] !== '' && $_GET['storage_gb'] !== '' && 
                 $_GET['price'] !== '' && $_GET['quantity'] !== '') {
 
-                // 3. Perform the update
                 mysqli_query($conn, "UPDATE smartphones SET
                   brand='{$_GET['brand']}',
                   model_name='{$_GET['model_name']}',
@@ -307,7 +306,6 @@
             }
 
           } else {
-            // ID does not exist
             echo "<div class='alert-error'>Error: Phone ID {$phone_id} does not exist. Please check the table below and try again.</div>";
           }
         }
@@ -329,14 +327,11 @@
           }
         }
       }
-
-      /* ========== RUN ACTION FIRST (IMPORTANT) ========== */
+      $conn = connectDB();
 
       insertRecord($conn);
       updateRecord($conn);
       deleteRecord($conn);
-
-      /* ================= MENU ================= */
 
       if ($action == "read") {
 
